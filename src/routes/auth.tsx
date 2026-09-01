@@ -183,6 +183,57 @@ function AuthPage() {
 
       <div className="flex items-center justify-center p-6">
         <div className="w-full max-w-sm">
+          {step === "setup" && (
+            <form onSubmit={createFirstAdmin} className="space-y-4">
+              <div className="space-y-1">
+                <h2 className="flex items-center gap-2 text-xl font-semibold">
+                  <UserPlus className="size-5 text-primary" /> First-run setup
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  No accounts exist yet. Create the first administrator; every other account is
+                  provisioned from User administration.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="setup-name">Full name</Label>
+                <Input
+                  id="setup-name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="setup-email">Work email</Label>
+                <Input
+                  id="setup-email"
+                  type="email"
+                  autoComplete="username"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="setup-password">Password (min. 10 characters)</Label>
+                <Input
+                  id="setup-password"
+                  type="password"
+                  autoComplete="new-password"
+                  minLength={10}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={busy}>
+                {busy && <Loader2 className="mr-2 size-4 animate-spin" />}
+                Create administrator
+              </Button>
+            </form>
+          )}
+
+
           {step === "credentials" && (
             <form onSubmit={signIn} className="space-y-4">
               <div className="space-y-1">
