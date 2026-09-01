@@ -66,9 +66,7 @@ export function PlanningWorkspace({
 
   const move = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: TaskStatus }) => {
-      const patch: Record<string, unknown> = { status };
-      if (status === "in_progress") patch['real_start_date'] = patch['real_start_date'] ?? undefined;
-      const { error } = await supabase.from("tasks").update(patch).eq("id", id);
+      const { error } = await supabase.from("tasks").update({ status }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
