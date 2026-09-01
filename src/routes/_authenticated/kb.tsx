@@ -29,6 +29,9 @@ import {
 } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/kb")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    space: typeof search['space'] === "string" ? (search['space'] as string) : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Knowledge base | Atlas Enterprise Workspace" },
