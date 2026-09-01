@@ -89,7 +89,7 @@ function PortalPage() {
     queryKey: ["portal", user?.id],
     enabled: !!user?.id,
     queryFn: async () => {
-      const [memberships, ownedProjects, myTasks, spaces] = await Promise.all([
+      const [memberships, ownedProjects, myTasks, spaces, profiles] = await Promise.all([
         supabase.from("project_members").select("project_id, project_role, allocation_pct").eq("user_id", user!.id),
         supabase.from("projects").select("*").eq("owner_id", user!.id),
         supabase
@@ -99,6 +99,7 @@ function PortalPage() {
           )
           .eq("assignee_id", user!.id),
         supabase.from("kb_spaces").select("id,key,name,project_id"),
+        supabase.from("profiles").select("id, full_name, email"),
       ]);
 
       const memberIds = (memberships.data ?? []).map((m) => m.project_id);
@@ -111,14 +112,26 @@ function PortalPage() {
         ? ((await supabase.from("projects").select("*").in("id", ids)).data ?? [])
         : [];
 
+      const people: Record<string, string> = {};
+      for (const p of profiles.data ?? []) people[p.id] = p.full_name || p.email;
+
       return {
         projects,
         memberships: memberships.data ?? [],
         tasks: (myTasks.data ?? []) as TaskRow[],
         spaces: spaces.data ?? [],
+        people,
       };
     },
   });
+
+  const projects = data?.projects ?? [];
+  const [planProjectId, setPlanProjectId] = useState<string | null>(null);
+  useEffect(() => {
+    if (!planProjectId && projects.length > 0) setPlanProjectId(projects[0]!.id);
+  }, [planProjectId, projects]);
+  const planProject = projects.find((p) => p.id === planProjectId) ?? null;
+
 
   const tasks = data?.tasks ?? [];
   const openTasks = tasks.filter((t) => t.status !== "done");
