@@ -4,7 +4,7 @@ import { BookOpen, CalendarClock, FolderKanban } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/useAuth";
-import { PRIORITY_CLASS, PRIORITY_LABELS, STATUS_LABELS } from "@/lib/roles";
+import { PRIORITY_CLASS, PRIORITY_LABELS, ROLE_LABELS, STATUS_LABELS } from "@/lib/roles";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -80,7 +80,7 @@ function PortalPage() {
     enabled: !!user?.id,
     queryFn: async () => {
       const [memberships, ownedProjects, myTasks, spaces] = await Promise.all([
-        supabase.from("project_members").select("project_id, role, allocation_pct").eq("user_id", user!.id),
+        supabase.from("project_members").select("project_id, project_role, allocation_pct").eq("user_id", user!.id),
         supabase.from("projects").select("*").eq("owner_id", user!.id),
         supabase
           .from("tasks")
@@ -224,7 +224,9 @@ function PortalPage() {
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {membership?.role ? `Your role: ${membership.role}` : "Assigned work"}
+                    {membership?.project_role
+                      ? `Your role: ${ROLE_LABELS[membership.project_role]}`
+                      : "Assigned work"}
                     {membership?.allocation_pct ? ` · ${membership.allocation_pct}% allocated` : ""}
                   </p>
                 </CardHeader>
@@ -258,7 +260,7 @@ function PortalPage() {
                       </Link>
                     </Button>
                     <Button asChild size="sm" variant="outline">
-                      <Link to="/kb" search={space ? { space: space.id } : {}}>
+                      <Link to="/kb" search={{ space: space?.id }}>
                         <BookOpen className="mr-2 size-4" />
                         {space ? `Knowledge base · ${space.key}` : "Knowledge base"}
                       </Link>
