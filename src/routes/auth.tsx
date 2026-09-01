@@ -1,12 +1,14 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { KeyRound, Loader2, ShieldCheck } from "lucide-react";
+import { KeyRound, Loader2, ShieldCheck, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
+import { bootstrapAdmin, bootstrapNeeded } from "@/lib/bootstrap.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -30,13 +32,14 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
-type Step = "credentials" | "enroll" | "challenge";
+type Step = "credentials" | "enroll" | "challenge" | "setup";
 
 function AuthPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>("credentials");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [factorId, setFactorId] = useState<string | null>(null);
@@ -46,10 +49,35 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) void routeAfterLogin();
+      if (data.session) {
+        void routeAfterLogin();
+        return;
+      }
+      void bootstrapNeeded()
+        .then((r) => {
+          if (r.needed) setStep("setup");
+        })
+        .catch(() => undefined);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  async function createFirstAdmin(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      await bootstrapAdmin({ data: { email, password, full_name: fullName } });
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw new Error(error.message);
+      toast.success("Administrator account created");
+      await routeAfterLogin();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Setup failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
 
   async function routeAfterLogin() {
     const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
@@ -155,6 +183,57 @@ function AuthPage() {
 
       <div className="flex items-center justify-center p-6">
         <div className="w-full max-w-sm">
+          {step === "setup" && (
+            <form onSubmit={createFirstAdmin} className="space-y-4">
+              <div className="space-y-1">
+                <h2 className="flex items-center gap-2 text-xl font-semibold">
+                  <UserPlus className="size-5 text-primary" /> First-run setup
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  No accounts exist yet. Create the first administrator; every other account is
+                  provisioned from User administration.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="setup-name">Full name</Label>
+                <Input
+                  id="setup-name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="setup-email">Work email</Label>
+                <Input
+                  id="setup-email"
+                  type="email"
+                  autoComplete="username"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="setup-password">Password (min. 10 characters)</Label>
+                <Input
+                  id="setup-password"
+                  type="password"
+                  autoComplete="new-password"
+                  minLength={10}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={busy}>
+                {busy && <Loader2 className="mr-2 size-4 animate-spin" />}
+                Create administrator
+              </Button>
+            </form>
+          )}
+
+
           {step === "credentials" && (
             <form onSubmit={signIn} className="space-y-4">
               <div className="space-y-1">
