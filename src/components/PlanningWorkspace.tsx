@@ -109,13 +109,15 @@ function TaskLink({
   projectId,
   children,
   className,
+  title,
 }: {
   projectId: string;
   children: React.ReactNode;
   className?: string;
+  title?: string;
 }) {
   return (
-    <Link to="/projects/$projectId" params={{ projectId }} className={className}>
+    <Link to="/projects/$projectId" params={{ projectId }} className={className} title={title}>
       {children}
     </Link>
   );

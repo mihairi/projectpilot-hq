@@ -185,7 +185,7 @@ function PortalPage() {
             <LayoutDashboard className="size-4 text-primary" /> Plan your work
           </h2>
           {projects.length > 0 && (
-            <Select value={planProjectId ?? undefined} onValueChange={setPlanProjectId}>
+            <Select value={planProjectId ?? ""} onValueChange={(v) => setPlanProjectId(v)}>
               <SelectTrigger className="w-72">
                 <SelectValue placeholder="Choose a project" />
               </SelectTrigger>
