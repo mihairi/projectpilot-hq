@@ -80,7 +80,7 @@ function Reports() {
     const map = new Map<string, { name: string; total: number; projects: string[] }>();
     for (const m of data?.members ?? []) {
       const key = m.user_id;
-      const entry = map.get(key) ?? {
+      const entry: { name: string; total: number; projects: string[] } = map.get(key) ?? {
         name: (m as any).profiles?.full_name ?? (m as any).profiles?.email ?? "Unknown",
         total: 0,
         projects: [],
