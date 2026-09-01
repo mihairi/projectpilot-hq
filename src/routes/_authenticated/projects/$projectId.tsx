@@ -142,6 +142,7 @@ function ProjectDetail() {
       ).data ?? [],
   });
 
+  const g = (k: string) => form[k] ?? "";
   const num = (v: string) => (v === "" ? null : Number(v));
   const str = (v: string) => (v === "" ? null : v);
 
@@ -149,22 +150,22 @@ function ProjectDetail() {
     mutationFn: async () => {
       const payload = {
         project_id: projectId,
-        title: form.title,
-        description: str(form.description),
-        task_type: form.task_type,
-        status: form.status,
-        priority: Number(form.priority),
-        assignee_id: form.assignee_id || null,
+        title: g("title"),
+        description: str(g("description")),
+        task_type: g("task_type"),
+        status: g("status"),
+        priority: Number(g("priority")),
+        assignee_id: g("assignee_id") || null,
         reporter_id: editing?.reporter_id ?? user!.id,
-        est_start_date: str(form.est_start_date),
-        est_duration_days: num(form.est_duration_days),
-        est_end_date: str(form.est_end_date),
-        upd_start_date: str(form.upd_start_date),
-        upd_duration_days: num(form.upd_duration_days),
-        upd_end_date: str(form.upd_end_date),
-        real_start_date: str(form.real_start_date),
-        real_duration_days: num(form.real_duration_days),
-        real_end_date: str(form.real_end_date),
+        est_start_date: str(g("est_start_date")),
+        est_duration_days: num(g("est_duration_days")),
+        est_end_date: str(g("est_end_date")),
+        upd_start_date: str(g("upd_start_date")),
+        upd_duration_days: num(g("upd_duration_days")),
+        upd_end_date: str(g("upd_end_date")),
+        real_start_date: str(g("real_start_date")),
+        real_duration_days: num(g("real_duration_days")),
+        real_end_date: str(g("real_end_date")),
       };
       if (editing) {
         const { error } = await supabase.from("tasks").update(payload).eq("id", editing.id);
@@ -471,19 +472,19 @@ function ProjectDetail() {
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="space-y-2 sm:col-span-3">
               <Label>Title</Label>
-              <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+              <Input value={g("title")} onChange={(e) => setForm({ ...form, title: e.target.value })} />
             </div>
             <div className="space-y-2 sm:col-span-3">
               <Label>Description</Label>
               <Textarea
                 rows={3}
-                value={form.description}
+                value={g("description")}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
               />
             </div>
             <div className="space-y-2">
               <Label>Type</Label>
-              <Select value={form.task_type} onValueChange={(v) => setForm({ ...form, task_type: v })}>
+              <Select value={g("task_type")} onValueChange={(v) => setForm({ ...form, task_type: v })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -498,7 +499,7 @@ function ProjectDetail() {
             </div>
             <div className="space-y-2">
               <Label>Status</Label>
-              <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
+              <Select value={g("status")} onValueChange={(v) => setForm({ ...form, status: v })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -513,7 +514,7 @@ function ProjectDetail() {
             </div>
             <div className="space-y-2">
               <Label>Priority</Label>
-              <Select value={form.priority} onValueChange={(v) => setForm({ ...form, priority: v })}>
+              <Select value={g("priority")} onValueChange={(v) => setForm({ ...form, priority: v })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -529,7 +530,7 @@ function ProjectDetail() {
             <div className="space-y-2 sm:col-span-3">
               <Label>Assignee</Label>
               <Select
-                value={form.assignee_id || "none"}
+                value={g("assignee_id") || "none"}
                 onValueChange={(v) => setForm({ ...form, assignee_id: v === "none" ? "" : v })}
               >
                 <SelectTrigger>
@@ -562,7 +563,7 @@ function ProjectDetail() {
                     <Label>Start date</Label>
                     <Input
                       type="date"
-                      value={form[`${prefix}_start_date`]}
+                      value={g(`${prefix}_start_date`)}
                       onChange={(e) => setForm({ ...form, [`${prefix}_start_date`]: e.target.value })}
                     />
                   </div>
@@ -571,7 +572,7 @@ function ProjectDetail() {
                     <Input
                       type="number"
                       step="0.5"
-                      value={form[`${prefix}_duration_days`]}
+                      value={g(`${prefix}_duration_days`)}
                       onChange={(e) =>
                         setForm({ ...form, [`${prefix}_duration_days`]: e.target.value })
                       }
@@ -581,7 +582,7 @@ function ProjectDetail() {
                     <Label>End date</Label>
                     <Input
                       type="date"
-                      value={form[`${prefix}_end_date`]}
+                      value={g(`${prefix}_end_date`)}
                       onChange={(e) => setForm({ ...form, [`${prefix}_end_date`]: e.target.value })}
                     />
                   </div>
@@ -640,7 +641,7 @@ function ProjectDetail() {
             )}
           </div>
           <DialogFooter>
-            <Button onClick={() => saveTask.mutate()} disabled={!form.title || saveTask.isPending}>
+            <Button onClick={() => saveTask.mutate()} disabled={!g("title") || saveTask.isPending}>
               {editing ? "Save changes" : "Create task"}
             </Button>
           </DialogFooter>
