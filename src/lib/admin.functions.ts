@@ -57,11 +57,15 @@ export const adminCreateUser = createServerFn({ method: "POST" })
         { onConflict: "user_id,role" },
       );
     // Drop the default role the signup trigger adds when it was not requested.
-    await supabaseAdmin
+    const { data: existing } = await supabaseAdmin
       .from("user_roles")
-      .delete()
-      .eq("user_id", created.user.id)
-      .not("role", "in", `(${data.roles.join(",")})`);
+      .select("id, role")
+      .eq("user_id", created.user.id);
+    const stale = (existing ?? [])
+      .filter((row) => !data.roles.includes(row.role as (typeof data.roles)[number]))
+      .map((row) => row.id);
+    if (stale.length) await supabaseAdmin.from("user_roles").delete().in("id", stale);
+
 
 
     return { userId: created.user.id };
