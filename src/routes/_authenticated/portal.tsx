@@ -179,6 +179,42 @@ function PortalPage() {
         ))}
       </div>
 
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="flex items-center gap-2 text-lg font-semibold">
+            <LayoutDashboard className="size-4 text-primary" /> Plan your work
+          </h2>
+          {projects.length > 0 && (
+            <Select value={planProjectId ?? undefined} onValueChange={setPlanProjectId}>
+              <SelectTrigger className="w-72">
+                <SelectValue placeholder="Choose a project" />
+              </SelectTrigger>
+              <SelectContent>
+                {projects.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.key} — {p.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
+        {planProject ? (
+          <PlanningWorkspace
+            key={planProject.id}
+            projectId={planProject.id}
+            projectKey={planProject.key}
+            people={data?.people ?? {}}
+          />
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            {isLoading ? "Loading…" : "Join a project to start planning."}
+          </p>
+        )}
+      </section>
+
+
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
