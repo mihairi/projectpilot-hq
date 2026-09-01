@@ -38,7 +38,9 @@ export const adminCreateUser = createServerFn({ method: "POST" })
         full_name: data.full_name,
         job_title: data.job_title ?? null,
         department: data.department ?? null,
+        role: data.roles[0],
       },
+
     });
     if (error || !created.user) throw new Error(error?.message ?? "Could not create the user.");
 
@@ -50,10 +52,23 @@ export const adminCreateUser = createServerFn({ method: "POST" })
       department: data.department ?? null,
       is_active: true,
     });
-    await supabaseAdmin.from("user_roles").delete().eq("user_id", created.user.id);
     await supabaseAdmin
       .from("user_roles")
-      .insert(data.roles.map((role) => ({ user_id: created.user!.id, role })));
+      .upsert(
+        data.roles.map((role) => ({ user_id: created.user!.id, role })),
+        { onConflict: "user_id,role" },
+      );
+    // Drop the default role the signup trigger adds when it was not requested.
+    const { data: existing } = await supabaseAdmin
+      .from("user_roles")
+      .select("id, role")
+      .eq("user_id", created.user.id);
+    const stale = (existing ?? [])
+      .filter((row) => !data.roles.includes(row.role as (typeof data.roles)[number]))
+      .map((row) => row.id);
+    if (stale.length) await supabaseAdmin.from("user_roles").delete().in("id", stale);
+
+
 
     return { userId: created.user.id };
   });

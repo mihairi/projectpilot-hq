@@ -80,22 +80,24 @@ function AuthPage() {
 
 
   async function routeAfterLogin() {
+    // Two-factor is mandatory: anyone without a verified authenticator enrols now.
+    const { data: factors } = await supabase.auth.mfa.listFactors();
+    const verified = factors?.totp?.find((f) => f.status === "verified");
+    if (!verified) {
+      await startEnrolment();
+      return;
+    }
     const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
     if (aal?.currentLevel === aal?.nextLevel) {
       navigate({ to: "/dashboard", replace: true });
       return;
     }
-    const { data: factors } = await supabase.auth.mfa.listFactors();
-    const verified = factors?.totp?.find((f) => f.status === "verified");
-    if (verified) {
-      const { data: ch } = await supabase.auth.mfa.challenge({ factorId: verified.id });
-      setFactorId(verified.id);
-      setChallengeId(ch?.id ?? null);
-      setStep("challenge");
-    } else {
-      await startEnrolment();
-    }
+    const { data: ch } = await supabase.auth.mfa.challenge({ factorId: verified.id });
+    setFactorId(verified.id);
+    setChallengeId(ch?.id ?? null);
+    setStep("challenge");
   }
+
 
   async function startEnrolment() {
     const { data: existing } = await supabase.auth.mfa.listFactors();
