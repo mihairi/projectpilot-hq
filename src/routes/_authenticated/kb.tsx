@@ -29,6 +29,9 @@ import {
 } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/kb")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    space: typeof search['space'] === "string" ? (search['space'] as string) : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Knowledge base | Atlas Enterprise Workspace" },
@@ -58,8 +61,9 @@ function renderMarkdown(src: string) {
 
 function KnowledgeBase() {
   const { user, perms } = useCurrentUser();
+  const { space: spaceParam } = Route.useSearch();
   const qc = useQueryClient();
-  const [spaceId, setSpaceId] = useState<string | null>(null);
+  const [spaceId, setSpaceId] = useState<string | null>(spaceParam ?? null);
   const [pageId, setPageId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState(false);

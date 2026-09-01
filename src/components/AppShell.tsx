@@ -8,6 +8,7 @@ import {
   LogOut,
   BarChart3,
   ShieldCheck,
+  UserRound,
   Users,
 } from "lucide-react";
 import type { ReactNode } from "react";
@@ -29,10 +30,12 @@ import { cn } from "@/lib/utils";
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/portal", label: "My portal", icon: UserRound },
   { to: "/projects", label: "Projects", icon: FolderKanban },
   { to: "/reports", label: "Reports", icon: BarChart3 },
   { to: "/kb", label: "Knowledge base", icon: BookOpen },
 ] as const;
+
 
 function Notifications() {
   const { user } = useCurrentUser();

@@ -89,7 +89,7 @@ function AuthPage() {
     }
     const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
     if (aal?.currentLevel === aal?.nextLevel) {
-      navigate({ to: "/dashboard", replace: true });
+      navigate({ to: "/portal", replace: true });
       return;
     }
     const { data: ch } = await supabase.auth.mfa.challenge({ factorId: verified.id });
@@ -156,7 +156,7 @@ function AuthPage() {
       return;
     }
     toast.success("Two-factor verification complete");
-    navigate({ to: "/dashboard", replace: true });
+    navigate({ to: "/portal", replace: true });
   }
 
   return (

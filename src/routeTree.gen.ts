@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedKbRouteImport } from './routes/_authenticated/kb'
+import { Route as AuthenticatedPortalRouteImport } from './routes/_authenticated/portal'
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
 import { Route as AuthenticatedSecurityRouteImport } from './routes/_authenticated/security'
 import { Route as AuthenticatedProjectsIndexRouteImport } from './routes/_authenticated/projects/index'
@@ -49,6 +50,11 @@ const AuthenticatedKbRoute = AuthenticatedKbRouteImport.update({
   path: '/kb',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPortalRoute = AuthenticatedPortalRouteImport.update({
+  id: '/portal',
+  path: '/portal',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/kb': typeof AuthenticatedKbRoute
+  '/portal': typeof AuthenticatedPortalRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/security': typeof AuthenticatedSecurityRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/kb': typeof AuthenticatedKbRoute
+  '/portal': typeof AuthenticatedPortalRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/security': typeof AuthenticatedSecurityRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/kb': typeof AuthenticatedKbRoute
+  '/_authenticated/portal': typeof AuthenticatedPortalRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/security': typeof AuthenticatedSecurityRoute
   '/_authenticated/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/dashboard'
     | '/kb'
+    | '/portal'
     | '/reports'
     | '/security'
     | '/projects/$projectId'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/dashboard'
     | '/kb'
+    | '/portal'
     | '/reports'
     | '/security'
     | '/projects/$projectId'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/dashboard'
     | '/_authenticated/kb'
+    | '/_authenticated/portal'
     | '/_authenticated/reports'
     | '/_authenticated/security'
     | '/_authenticated/projects/$projectId'
@@ -194,6 +206,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedKbRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/portal': {
+      id: '/_authenticated/portal'
+      path: '/portal'
+      fullPath: '/portal'
+      preLoaderRoute: typeof AuthenticatedPortalRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/reports': {
       id: '/_authenticated/reports'
       path: '/reports'
@@ -229,6 +248,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedKbRoute: typeof AuthenticatedKbRoute
+  AuthenticatedPortalRoute: typeof AuthenticatedPortalRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
   AuthenticatedSecurityRoute: typeof AuthenticatedSecurityRoute
   AuthenticatedProjectsProjectIdRoute: typeof AuthenticatedProjectsProjectIdRoute
@@ -239,6 +259,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedKbRoute: AuthenticatedKbRoute,
+  AuthenticatedPortalRoute: AuthenticatedPortalRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
   AuthenticatedSecurityRoute: AuthenticatedSecurityRoute,
   AuthenticatedProjectsProjectIdRoute: AuthenticatedProjectsProjectIdRoute,
