@@ -1,13 +1,23 @@
+import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { BookOpen, CalendarClock, FolderKanban } from "lucide-react";
+import { BookOpen, CalendarClock, FolderKanban, LayoutDashboard } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/useAuth";
 import { PRIORITY_CLASS, PRIORITY_LABELS, ROLE_LABELS, STATUS_LABELS } from "@/lib/roles";
+import { PlanningWorkspace } from "@/components/PlanningWorkspace";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 
 export const Route = createFileRoute("/_authenticated/portal")({
   head: () => ({
@@ -79,7 +89,7 @@ function PortalPage() {
     queryKey: ["portal", user?.id],
     enabled: !!user?.id,
     queryFn: async () => {
-      const [memberships, ownedProjects, myTasks, spaces] = await Promise.all([
+      const [memberships, ownedProjects, myTasks, spaces, profiles] = await Promise.all([
         supabase.from("project_members").select("project_id, project_role, allocation_pct").eq("user_id", user!.id),
         supabase.from("projects").select("*").eq("owner_id", user!.id),
         supabase
@@ -89,6 +99,7 @@ function PortalPage() {
           )
           .eq("assignee_id", user!.id),
         supabase.from("kb_spaces").select("id,key,name,project_id"),
+        supabase.from("profiles").select("id, full_name, email"),
       ]);
 
       const memberIds = (memberships.data ?? []).map((m) => m.project_id);
@@ -101,14 +112,26 @@ function PortalPage() {
         ? ((await supabase.from("projects").select("*").in("id", ids)).data ?? [])
         : [];
 
+      const people: Record<string, string> = {};
+      for (const p of profiles.data ?? []) people[p.id] = p.full_name || p.email;
+
       return {
         projects,
         memberships: memberships.data ?? [],
         tasks: (myTasks.data ?? []) as TaskRow[],
         spaces: spaces.data ?? [],
+        people,
       };
     },
   });
+
+  const projects = data?.projects ?? [];
+  const [planProjectId, setPlanProjectId] = useState<string | null>(null);
+  useEffect(() => {
+    if (!planProjectId && projects.length > 0) setPlanProjectId(projects[0]!.id);
+  }, [planProjectId, projects]);
+  const planProject = projects.find((p) => p.id === planProjectId) ?? null;
+
 
   const tasks = data?.tasks ?? [];
   const openTasks = tasks.filter((t) => t.status !== "done");
@@ -155,6 +178,42 @@ function PortalPage() {
           </Card>
         ))}
       </div>
+
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="flex items-center gap-2 text-lg font-semibold">
+            <LayoutDashboard className="size-4 text-primary" /> Plan your work
+          </h2>
+          {projects.length > 0 && (
+            <Select value={planProjectId ?? ""} onValueChange={(v) => setPlanProjectId(v)}>
+              <SelectTrigger className="w-72">
+                <SelectValue placeholder="Choose a project" />
+              </SelectTrigger>
+              <SelectContent>
+                {projects.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.key} — {p.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
+        {planProject ? (
+          <PlanningWorkspace
+            key={planProject.id}
+            projectId={planProject.id}
+            projectKey={planProject.key}
+            people={data?.people ?? {}}
+          />
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            {isLoading ? "Loading…" : "Join a project to start planning."}
+          </p>
+        )}
+      </section>
+
+
 
       <Card>
         <CardHeader>
