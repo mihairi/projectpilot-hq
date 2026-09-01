@@ -38,7 +38,9 @@ export const adminCreateUser = createServerFn({ method: "POST" })
         full_name: data.full_name,
         job_title: data.job_title ?? null,
         department: data.department ?? null,
+        role: data.roles[0],
       },
+
     });
     if (error || !created.user) throw new Error(error?.message ?? "Could not create the user.");
 
