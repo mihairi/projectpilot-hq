@@ -54,7 +54,10 @@ function SecurityPage() {
       friendlyName: `Authenticator ${Date.now()}`,
     });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     setFactorId(data.id);
     setQr(data.totp.qr_code);
     setSecret(data.totp.secret);
@@ -66,7 +69,8 @@ function SecurityPage() {
     const { data: ch, error: cerr } = await supabase.auth.mfa.challenge({ factorId });
     if (cerr) {
       setBusy(false);
-      return toast.error(cerr.message);
+      toast.error(cerr.message);
+      return;
     }
     const { error } = await supabase.auth.mfa.verify({
       factorId,
@@ -74,7 +78,10 @@ function SecurityPage() {
       code: code.trim(),
     });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     setQr(null);
     setSecret(null);
     setCode("");
@@ -87,11 +94,13 @@ function SecurityPage() {
     setBusy(true);
     const { error } = await supabase.auth.updateUser({
       password: newPassword,
-      // @ts-expect-error current_password is supported by Lovable Cloud auth
       current_password: currentPassword,
     });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     setCurrentPassword("");
     setNewPassword("");
     toast.success("Password updated");
