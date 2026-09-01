@@ -61,8 +61,9 @@ function renderMarkdown(src: string) {
 
 function KnowledgeBase() {
   const { user, perms } = useCurrentUser();
+  const { space: spaceParam } = Route.useSearch();
   const qc = useQueryClient();
-  const [spaceId, setSpaceId] = useState<string | null>(null);
+  const [spaceId, setSpaceId] = useState<string | null>(spaceParam ?? null);
   const [pageId, setPageId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState(false);
