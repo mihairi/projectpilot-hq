@@ -46,7 +46,7 @@ export const Route = createFileRoute("/_authenticated/kb")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: KnowledgeBase;
+  component: KnowledgeBase,
 });
 
 function renderMarkdown(src: string) {
