@@ -32,13 +32,14 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
-type Step = "credentials" | "enroll" | "challenge";
+type Step = "credentials" | "enroll" | "challenge" | "setup";
 
 function AuthPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>("credentials");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [factorId, setFactorId] = useState<string | null>(null);
@@ -48,10 +49,35 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) void routeAfterLogin();
+      if (data.session) {
+        void routeAfterLogin();
+        return;
+      }
+      void bootstrapNeeded()
+        .then((r) => {
+          if (r.needed) setStep("setup");
+        })
+        .catch(() => undefined);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  async function createFirstAdmin(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      await bootstrapAdmin({ data: { email, password, full_name: fullName } });
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw new Error(error.message);
+      toast.success("Administrator account created");
+      await routeAfterLogin();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Setup failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
 
   async function routeAfterLogin() {
     const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
