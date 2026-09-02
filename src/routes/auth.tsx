@@ -4,6 +4,7 @@ import { KeyRound, Loader2, ShieldCheck, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
+import { resolveUsername } from "@/lib/auth.functions";
 import { bootstrapAdmin, bootstrapNeeded } from "@/lib/bootstrap.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
