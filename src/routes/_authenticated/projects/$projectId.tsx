@@ -252,6 +252,21 @@ function ProjectDetail() {
   const nameOf = (id: string | null) =>
     people.data?.find((x: any) => x.id === id)?.full_name ?? "Unassigned";
 
+  /** Start-date locking rules, mirrored by a database trigger. */
+  const todayIso = new Date().toISOString().slice(0, 10);
+  function startLock(prefix: "est" | "upd" | "real"): string | null {
+    if (!editing) return null;
+    const current: string | null = editing[`${prefix}_start_date`] ?? null;
+    if (!current) return null;
+    if (prefix === "est") {
+      return perms.setGlobalPriority
+        ? null
+        : "Locked once set — only an administrator or global project manager can change it.";
+    }
+    return current < todayIso ? "Locked — this start date is already in the past." : null;
+  }
+
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -564,9 +579,15 @@ function ProjectDetail() {
                     <Input
                       type="date"
                       value={g(`${prefix}_start_date`)}
+                      disabled={!!startLock(prefix)}
+                      title={startLock(prefix) ?? undefined}
                       onChange={(e) => setForm({ ...form, [`${prefix}_start_date`]: e.target.value })}
                     />
+                    {startLock(prefix) && (
+                      <p className="text-[11px] text-muted-foreground">{startLock(prefix)}</p>
+                    )}
                   </div>
+
                   <div className="space-y-2">
                     <Label>Duration (days)</Label>
                     <Input
