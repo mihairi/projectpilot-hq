@@ -564,9 +564,15 @@ function ProjectDetail() {
                     <Input
                       type="date"
                       value={g(`${prefix}_start_date`)}
+                      disabled={!!startLock(prefix)}
+                      title={startLock(prefix) ?? undefined}
                       onChange={(e) => setForm({ ...form, [`${prefix}_start_date`]: e.target.value })}
                     />
+                    {startLock(prefix) && (
+                      <p className="text-[11px] text-muted-foreground">{startLock(prefix)}</p>
+                    )}
                   </div>
+
                   <div className="space-y-2">
                     <Label>Duration (days)</Label>
                     <Input
