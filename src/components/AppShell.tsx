@@ -4,6 +4,8 @@ import {
   Bell,
   BookOpen,
   FolderKanban,
+  Gauge,
+
   LayoutDashboard,
   LogOut,
   BarChart3,
