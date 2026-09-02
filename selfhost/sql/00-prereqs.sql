@@ -16,17 +16,17 @@ do $$ begin
     create role service_role nologin noinherit bypassrls;
   end if;
   if not exists (select 1 from pg_roles where rolname = 'authenticator') then
-    execute format('create role authenticator login noinherit password %L',
-                   current_setting('POSTGRES_PASSWORD', true));
+    create role authenticator login noinherit;
   end if;
   if not exists (select 1 from pg_roles where rolname = 'supabase_auth_admin') then
     create role supabase_auth_admin login createrole noinherit;
   end if;
 end $$;
 
--- the password is not visible through current_setting in all setups; set it explicitly
-alter role authenticator with login password :'password';
-alter role supabase_auth_admin with password :'password';
+-- give the API roles the same password as the database superuser
+\getenv pw POSTGRES_PASSWORD
+alter role authenticator with login password :'pw';
+alter role supabase_auth_admin with login password :'pw';
 
 grant anon, authenticated, service_role to authenticator;
 
