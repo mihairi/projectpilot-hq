@@ -4,6 +4,8 @@ import {
   Bell,
   BookOpen,
   FolderKanban,
+  Gauge,
+
   LayoutDashboard,
   LogOut,
   BarChart3,
@@ -155,6 +157,18 @@ export function AppShell({ children }: { children: ReactNode }) {
               {item.label}
             </Link>
           ))}
+          {perms.report && (
+            <Link
+              to="/manager"
+              className={cn(
+                "flex items-center gap-3 rounded px-3 py-2 text-sm transition-colors hover:bg-sidebar-accent",
+                pathname.startsWith("/manager") && "bg-sidebar-accent font-medium",
+              )}
+            >
+              <Gauge className="size-4" />
+              Manager view
+            </Link>
+          )}
           {perms.manageUsers && (
             <Link
               to="/admin"
@@ -167,6 +181,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               User administration
             </Link>
           )}
+
           <Link
             to="/security"
             className={cn(
