@@ -7,7 +7,13 @@ import { APP_ROLES } from "@/lib/roles";
 const roleSchema = z.enum(APP_ROLES);
 
 async function assertAdmin(context: { supabase: any; userId: string }) {
-  const { data, error } = await context.supabase.rpc("is_admin", { _user_id: context.userId });
+  // Verified through the caller's own RLS-scoped role row (never the admin client).
+  const { data, error } = await context.supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", context.userId)
+    .eq("role", "admin")
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Forbidden: administrator rights required.");
 }
