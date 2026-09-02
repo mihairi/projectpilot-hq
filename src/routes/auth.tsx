@@ -121,13 +121,18 @@ function AuthPage() {
   async function signIn(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setBusy(false);
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      // Username-only sign-in: resolve the part before "@" to the account email.
+      const { email: resolved } = await resolveUsername({ data: { username: email } });
+      if (!resolved) throw new Error("Unknown username.");
+      const { error } = await supabase.auth.signInWithPassword({ email: resolved, password });
+      if (error) throw new Error(error.message);
+      await routeAfterLogin();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Sign in failed");
+    } finally {
+      setBusy(false);
     }
-    await routeAfterLogin();
   }
 
   async function verifyCode(e: React.FormEvent) {
@@ -245,15 +250,18 @@ function AuthPage() {
                 </p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Username (email)</Label>
+                <Label htmlFor="email">Username</Label>
                 <Input
                   id="email"
-                  type="email"
                   autoComplete="username"
+                  placeholder="firstname.lastname"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
+                <p className="text-xs text-muted-foreground">
+                  The part before @ in your work email.
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
