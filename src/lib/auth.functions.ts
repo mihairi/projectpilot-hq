@@ -13,7 +13,7 @@ export const resolveUsername = createServerFn({ method: "GET" })
       .parse(input),
   )
   .handler(async ({ data }) => {
-    const username = data.username.split("@")[0].trim().toLowerCase();
+    const username = (data.username.split("@")[0] ?? "").trim().toLowerCase();
     if (!username) return { email: null as string | null };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows, error } = await supabaseAdmin
@@ -22,6 +22,6 @@ export const resolveUsername = createServerFn({ method: "GET" })
       .ilike("email", `${username.replace(/[%_]/g, "")}@%`)
       .limit(2);
     if (error) throw new Error(error.message);
-    const email = rows?.length === 1 ? rows[0].email : null;
+    const email = rows?.length === 1 ? (rows[0]?.email ?? null) : null;
     return { email };
   });
