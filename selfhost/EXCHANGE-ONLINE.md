@@ -59,11 +59,13 @@ Add these at your public DNS provider for the sending domain:
 The auth service sends account invitations, password resets and email-change
 confirmations through this SMTP configuration as soon as it is filled in.
 
-Application notifications (deadline approaching, task status change, priority change)
-are stored in the in-app notifications table today. To also email them, add a small
-scheduled job on the server that reads unsent rows and posts them through the same SMTP
-credentials — the credentials above are all it needs. A ready-made `notify.mjs` skeleton
-is described at the end of `README.md`.
+Application notifications — **deadline approaching**, **task status change** and
+**project priority update** — are emailed by `selfhost/scripts/notify.mjs`, which reads
+the same SMTP settings from `selfhost/.env`. Install its two dependencies once
+(`cd selfhost/scripts && npm install`), test with `npm run notify:dry`, then schedule
+`node notify.mjs` every 10 minutes as shown in `README.md`. It marks each row as emailed
+after a successful send and retries failures on the next run, so Exchange throttling or a
+short outage never loses a message.
 
 ## Testing the configuration
 
