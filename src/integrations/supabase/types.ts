@@ -107,8 +107,11 @@ export type Database = {
         Row: {
           body: string | null
           created_at: string
+          dedupe_key: string | null
+          emailed_at: string | null
           id: string
           is_read: boolean
+          kind: string
           link: string | null
           title: string
           user_id: string
@@ -116,8 +119,11 @@ export type Database = {
         Insert: {
           body?: string | null
           created_at?: string
+          dedupe_key?: string | null
+          emailed_at?: string | null
           id?: string
           is_read?: boolean
+          kind?: string
           link?: string | null
           title: string
           user_id: string
@@ -125,8 +131,11 @@ export type Database = {
         Update: {
           body?: string | null
           created_at?: string
+          dedupe_key?: string | null
+          emailed_at?: string | null
           id?: string
           is_read?: boolean
+          kind?: string
           link?: string | null
           title?: string
           user_id?: string
@@ -391,7 +400,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      queue_deadline_notifications: {
+        Args: { _days?: number }
+        Returns: number
+      }
     }
     Enums: {
       app_role:
