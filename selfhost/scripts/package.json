@@ -1,0 +1,14 @@
+{
+  "name": "portal-notify",
+  "private": true,
+  "type": "module",
+  "description": "Scheduled mailer that delivers portal notifications through Exchange Online",
+  "scripts": {
+    "notify": "node notify.mjs",
+    "notify:dry": "NOTIFY_DRY_RUN=1 node notify.mjs"
+  },
+  "dependencies": {
+    "nodemailer": "^6.9.14",
+    "pg": "^8.12.0"
+  }
+}
