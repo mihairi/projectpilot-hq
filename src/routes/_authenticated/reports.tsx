@@ -315,7 +315,7 @@ function Reports() {
               <TableBody>
                 {(data?.members ?? []).map((m: any) => (
                   <TableRow key={m.id}>
-                    <TableCell>{m.profiles?.full_name ?? m.profiles?.email}</TableCell>
+                    <TableCell>{m.member_name}</TableCell>
                     <TableCell>{m.projects?.key}</TableCell>
                     <TableCell>{ROLE_LABELS[m.project_role as keyof typeof ROLE_LABELS]}</TableCell>
                     <TableCell>{m.allocation_pct}%</TableCell>
