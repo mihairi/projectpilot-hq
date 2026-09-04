@@ -55,15 +55,22 @@ function Reports() {
   const { data } = useQuery({
     queryKey: ["report-data"],
     queryFn: async () => {
-      const [projects, tasks, members] = await Promise.all([
+      const [projects, tasks, members, profiles] = await Promise.all([
         supabase.from("projects").select("*").order("priority"),
         supabase.from("tasks").select("*, projects(key,name)"),
-        supabase.from("project_members").select("*, profiles(full_name,email), projects(key,name)"),
+        supabase.from("project_members").select("*, projects(key,name)"),
+        supabase.from("profiles").select("id,full_name,email"),
       ]);
+      const names = new Map(
+        (profiles.data ?? []).map((p: any) => [p.id, p.full_name || p.email] as const),
+      );
       return {
         projects: projects.data ?? [],
         tasks: tasks.data ?? [],
-        members: members.data ?? [],
+        members: (members.data ?? []).map((m: any) => ({
+          ...m,
+          member_name: names.get(m.user_id) ?? "Unknown user",
+        })),
       };
     },
   });
@@ -78,19 +85,20 @@ function Reports() {
 
   const allocation = useMemo(() => {
     const map = new Map<string, { name: string; total: number; projects: string[] }>();
-    for (const m of data?.members ?? []) {
+    for (const m of (data?.members ?? []) as any[]) {
       const key = m.user_id;
       const entry: { name: string; total: number; projects: string[] } = map.get(key) ?? {
-        name: (m as any).profiles?.full_name ?? (m as any).profiles?.email ?? "Unknown",
+        name: m.member_name,
         total: 0,
         projects: [],
       };
       entry.total += m.allocation_pct;
-      entry.projects.push(`${(m as any).projects?.key} (${m.allocation_pct}%)`);
+      entry.projects.push(`${m.projects?.key ?? "?"} (${m.allocation_pct}%)`);
       map.set(key, entry);
     }
     return [...map.values()].sort((a, b) => b.total - a.total);
   }, [data]);
+
 
   if (!perms.report) {
     return (
